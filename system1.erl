@@ -1,0 +1,10 @@
+% Harry Roscoe (har14) and Sahil Parekh (sp5714)
+-module(system1).
+-export([start/0]).
+
+start() ->
+  Processes = [spawn(process, start, [Id]) || Id <- lists:seq(1, 5)],
+  [P ! {neighbours, Processes} || P <- Processes],
+  [P ! {task1, start, 0, 3000} || P <- Processes],
+  ok.
+
