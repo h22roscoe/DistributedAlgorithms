@@ -1,27 +1,27 @@
 %%% Harry Roscoe (har14) and Sahil Parekh (sp5714)
--module(process).
+-module(process2).
 -export([start/1]).
 
 start(Id) ->
   receive
-    {neighbours, Ns} -> next(Ns, Id)
+    {bind, PL} -> next(Id, PL)
   end.
 
-next(Ns, Id) ->
+next(Id, PL) ->
   receive
-    {task1, start, Max_Messages, Timeout} ->
+    {task2, start, Max_Messages, Timeout} ->
       timer:send_after(Timeout, stop),
       Map = [{N, {0, 0}} || N <- Ns],
-      self() ! broadcast,
+      PL ! {pl_send, broadcast},
       if 
         Max_Messages =:= 0 ->
-          task1(Map, infinity, Id);
+          task2(Map, infinity, Id);
         true ->
-          task1(Map, Max_Messages, Id)
+          task2(Map, Max_Messages, Id)
       end
   end.
 
-task1(Ns, Max_Messages, Id) ->
+task2(Ns, Max_Messages, Id) ->
   receive
     {hello, Sender} ->
       NextNs = update_recs(Sender, Ns),
