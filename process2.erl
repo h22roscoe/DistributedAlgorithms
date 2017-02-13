@@ -1,37 +1,38 @@
 %%% Harry Roscoe (har14) and Sahil Parekh (sp5714)
 -module(process2).
--export([start/1]).
+-export([start/2]).
 
-start(Id) ->
-  receive
-    {bind, PL} -> next(Id, PL)
-  end.
+start(Id, Parent) ->
+  PL = spawn(perfect_P2P_links, start, [self()]),
+  Parent ! {new_pl, Id, PL},
+  next(Id, PL).
 
 next(Id, PL) ->
   receive
-    {task2, start, Max_Messages, Timeout} ->
+    {task2, start, Max_Messages, Timeout, Ns} ->
       timer:send_after(Timeout, stop),
       Map = [{N, {0, 0}} || N <- Ns],
-      PL ! {pl_send, broadcast},
-      if 
-        Max_Messages =:= 0 ->
-          task2(Map, infinity, Id);
-        true ->
-          task2(Map, Max_Messages, Id)
+      self() ! broadcast,
+      if Max_Messages =:= 0 ->
+        task2(Map, infinity, Id, PL);
+      true ->
+        task2(Map, Max_Messages, Id, PL)
       end
   end.
 
-task2(Ns, Max_Messages, Id) ->
+task2(Map, Max_Messages, Id, PL) ->
   receive
-    {hello, Sender} ->
-      NextNs = update_recs(Sender, Ns),
-      task1(NextNs, Max_Messages, Id);
-    broadcast ->  
-      [N ! {hello, self()} || {N, {_, Sen}} <- Ns, Sen < Max_Messages],
-      WithSends = [add_sends(N, Max_Messages) || N <- Ns],
-      task1(WithSends, Max_Messages, Id);
-    stop -> io:format("~p: ~w~n", [Id, lists:map(fun({_, Snd}) -> Snd end, Ns)])
-  after 0 -> self() ! broadcast, task1(Ns, Max_Messages, Id)
+    {pl_deliver, {hello, Sender}} ->
+      NewMap = update_recs(Sender, Map),
+      task2(NewMap, Max_Messages, Id, PL);
+    broadcast ->
+      [PL ! {pl_send, N, {hello, Id}} || {N, {_, Sen}} <- Map, Sen < Max_Messages],
+      WithSends = [add_sends(N, Max_Messages) || N <- Map],
+      task2(WithSends, Max_Messages, Id, PL);
+    stop -> io:format("~p: ~w~n", [Id, lists:map(fun({_, Snd}) -> Snd end, Map)])
+  after 0 ->
+    self() ! broadcast,
+    task2(Map, Max_Messages, Id, PL)
   end.
 
 add_sends({N, {Rec, Sen}}, Max_Messages) ->

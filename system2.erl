@@ -4,12 +4,10 @@
 
 start() ->
   N = 5,
-  Processes = [spawn(process2, start, [Id]) || Id <- lists:seq(1, N)],
-  PLs = [spawn(perfect_P2P_links, start, []) || _ <- lists:seq(1, N)], 
-  link(N, Processes, PLs),
-  [P ! {task2, start, 1000, 3000} || P <- Processes],
+  Processes = [spawn(process2, start, [Id, self()]) || Id <- lists:seq(1, N)],
+  Map = [receive {new_pl, Id, PL} -> {Id, PL} end || _ <- lists:seq(1, N)],
+  PLs = lists:map(fun({_, PL}) -> PL end, Map),
+  [PL ! {bind, Map} || PL <- PLs],  
+  [P ! {task2, start, 0, 3000, lists:seq(1, N)} || P <- Processes],
   ok.
 
-link(N, Processes, PLs) ->
-  [lists:nth(I, PLs) ! {bind, lists:nth(I, Processes), PLs} || I <- lists:seq(1, N)],
-  [lists:nth(I, Processes) ! {bind, lists:nth(I, PLs)} || I <- lists:seq(1, N)].
