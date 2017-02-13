@@ -10,8 +10,13 @@ start(Process) ->
 next(Process, Map) ->
   receive
     {pl_send, To, Msg} ->
-      [PL ! {send, Msg} || {Id, PL} <- Map, Id == To];
-    {send, Msg} ->
-      Process ! {pl_deliver, Msg}
+      send_to(Process, To, Map, Msg);
+    {send, From, Msg} ->
+      Process ! {pl_deliver, From, Msg}
   end,
   next(Process, Map).
+
+send_to(From, To, [{To, PL} | _], Msg) ->
+  PL ! {send, From, Msg};
+send_to(From, To, [_ | Rest], Msg) ->
+  send_to(From, To, Rest, Msg).

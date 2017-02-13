@@ -8,6 +8,6 @@ start() ->
   Map = [receive {new_pl, Id, PL} -> {Id, PL} end || _ <- lists:seq(1, N)],
   PLs = lists:map(fun({_, PL}) -> PL end, Map),
   [PL ! {bind, Map} || PL <- PLs],  
-  [P ! {task2, start, 0, 3000, lists:seq(1, N)} || P <- Processes],
+  [P ! {task2, start, 0, 3000, Processes} || P <- Processes],
   ok.
 
