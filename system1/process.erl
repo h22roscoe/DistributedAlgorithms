@@ -13,11 +13,10 @@ next(Ns, Id) ->
       timer:send_after(Timeout, stop),
       Map = [{N, {0, 0}} || N <- Ns],
       self() ! broadcast,
-      if 
-        Max_Messages == 0 ->
-          task1(Map, infinity, Id);
-        true ->
-          task1(Map, Max_Messages, Id)
+      if Max_Messages == 0 ->
+        task1(Map, infinity, Id);
+      true ->
+        task1(Map, Max_Messages, Id)
       end
   end.
 
@@ -35,9 +34,10 @@ task1(Ns, Max_Messages, Id) ->
   end.
 
 add_sends({N, {Rec, Sen}}, Max_Messages) ->
-  if
-    Sen < Max_Messages -> {N, {Rec, Sen + 1}};
-    true -> {N, {Rec, Sen}}
+  if Sen < Max_Messages ->
+    {N, {Rec, Sen + 1}};
+  true ->
+    {N, {Rec, Sen}}
   end.
 
 update_recs(Sender, [{Sender, {Rec, Sen}} | Rest]) ->
