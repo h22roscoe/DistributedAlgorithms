@@ -16,7 +16,7 @@ next(Owner, OwnerId, Map, Reliability) ->
   receive
     {pl_send, To, Msg} ->
       Rand = rand:uniform(100),
-      if Reliability >= Rand ->
+      if Reliability >= Rand -> % our way of implementing the sending
         maps:get(To, Map) ! {internal, OwnerId, Msg};
       true ->
         dont_send
@@ -25,4 +25,3 @@ next(Owner, OwnerId, Map, Reliability) ->
       Owner ! {pl_deliver, From, Msg}
   end,
   next(Owner, OwnerId, Map, Reliability).
-

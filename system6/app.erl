@@ -11,6 +11,7 @@ next(Id, RB) ->
   receive
     {task6, start, Max_Messages, Timeout, Ns} ->
       timer:send_after(Timeout, stop),
+      if Id == 3 -> timer:send_after(5, stop); true -> nothing end, % crash process 3
       Map = maps:from_list([{N, 0} || N <- Ns]),
       if Max_Messages == 0 ->
         task6(Map, infinity, Id, RB, 0);
@@ -21,7 +22,7 @@ next(Id, RB) ->
 
 task6(Map, Max_Messages, Id, RB, Sen) ->
   receive
-    {rb_deliver, Sender, {_, _, hello}} -> 
+    {rb_deliver, Sender, {_, _, hello}} ->
       Recs = maps:get(Sender, Map),
       NewMap = Map#{Sender := Recs + 1},
       task6(NewMap, Max_Messages, Id, RB, Sen);
@@ -37,4 +38,3 @@ task6(Map, Max_Messages, Id, RB, Sen) ->
       task6(Map, Max_Messages, Id, RB, Sen)
     end
   end.
-

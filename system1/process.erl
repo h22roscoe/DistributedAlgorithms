@@ -12,7 +12,6 @@ next(Ns, Id) ->
     {task1, start, Max_Messages, Timeout} ->
       timer:send_after(Timeout, stop),
       Map = maps:from_list([{N, 0} || N <- Ns]), % create map of neighbours with amount received from them
-      self() ! broadcast,
       if Max_Messages == 0 ->
         task1(Map, infinity, Id, 0);
       true ->
@@ -29,13 +28,11 @@ task1(Map, Max_Messages, Id, Sen) ->
       List = maps:to_list(Map),
       WithSen = lists:map(fun({_, Rec}) -> {Sen, Rec} end, List), % formatting for printing
       io:format("~p: ~w~n", [Id, WithSen])
-  after 0 -> 
-    if Sen < Max_Messages ->  
-      [N ! {hello, self()} || {N, _} <- maps:to_list(Map)],
-      % Update sends, recurse
-      task1(Map, Max_Messages, Id, Sen + 1);
+  after 0 ->
+    if Sen < Max_Messages ->
+      [N ! {hello, self()} || {N, _} <- maps:to_list(Map)], % message neighbour
+      task1(Map, Max_Messages, Id, Sen + 1); % Update sends, recurse
     true ->
       task1(Map, Max_Messages, Id, Sen)
     end
   end.
-
