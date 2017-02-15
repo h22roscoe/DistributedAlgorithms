@@ -5,6 +5,6 @@
 start() ->
   Processes = [spawn(process, start, [Id]) || Id <- lists:seq(1, 5)],
   [P ! {neighbours, Processes} || P <- Processes],
-  [P ! {task1, start, 0, 3000} || P <- Processes],
+  [P ! {task1, start, 1000, 3000} || P <- Processes],
   ok.
 

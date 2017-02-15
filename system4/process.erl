@@ -5,7 +5,7 @@
 start(Id, System) ->
   BEB = spawn(beb, start, []),
   App = spawn(app, start, []),
-  PL = spawn(lossyp2p, start, [50]),
+  PL = spawn(lossyp2p, start, [100]),
   App ! {bind, Id, BEB},
   BEB ! {bind, App, PL},
   PL ! {bind, BEB, Id},

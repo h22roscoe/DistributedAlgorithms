@@ -10,5 +10,5 @@ start() ->
   [BEB ! {processes, Ids} || {_, _, _, BEB} <- Quads],
   IdPLMap = maps:from_list([{Id, PL} || {Id, _, PL, _} <- Quads]),
   [PL ! {map, IdPLMap} || {_, _, PL, _} <- Quads],
-  [App ! {task3, start, 0, 3000, Ids} || {_, App, _, _} <- Quads],
+  [App ! {task3, start, 0, 1000, Ids} || {_, App, _, _} <- Quads],
   ok.
