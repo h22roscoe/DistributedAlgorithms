@@ -11,7 +11,7 @@ next(Id, PL) ->
   receive
     {task2, start, Max_Messages, Timeout, Ns} ->
       timer:send_after(Timeout, stop),
-      Map = maps:from_list([{N, 0} || N <- Ns]),
+      Map = maps:from_list([{N, 0} || N <- Ns]), % create map of neighbours with amount received from them
       if Max_Messages == 0 ->
         task2(Map, infinity, Id, PL, 0);
       true ->
@@ -23,11 +23,11 @@ task2(Map, Max_Messages, Id, PL, Sen) ->
   receive
     {pl_deliver, Sender, hello} -> 
       Recs = maps:get(Sender, Map),
-      NewMap = Map#{Sender := Recs + 1},
+      NewMap = Map#{Sender := Recs + 1}, % increment the received counter in the map respective to sender
       task2(NewMap, Max_Messages, Id, PL, Sen);
     stop ->
       List = maps:to_list(Map),
-      WithSen = lists:map(fun({_, Rec}) -> {Sen, Rec} end, List),
+      WithSen = lists:map(fun({_, Rec}) -> {Sen, Rec} end, List), % formatting for printing
       io:format("~p: ~w~n", [Id, WithSen])
   after 0 ->
     if Sen < Max_Messages ->

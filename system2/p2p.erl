@@ -15,9 +15,8 @@ next(Owner, OwnerId) ->
 next(Owner, OwnerId, Map) ->
   receive
     {pl_send, To, Msg} ->
-      maps:get(To, Map) ! {internal, OwnerId, Msg};
+      maps:get(To, Map) ! {internal, OwnerId, Msg}; % send internal message to PL of the ID in the map
     {internal, From, Msg} ->
       Owner ! {pl_deliver, From, Msg}
   end,
   next(Owner, OwnerId, Map).
-
