@@ -21,9 +21,9 @@ next(Id, BEB) ->
 
 task4(Map, Max_Messages, Id, BEB, Sen) ->
   receive
-    {beb_deliver, Sender, hello} -> 
+    {beb_deliver, Sender, hello} ->
       Recs = maps:get(Sender, Map),
-      NewMap = Map#{Sender := Recs + 1},
+      NewMap = Map#{Sender := Recs + 1},  % increment the received counter in the map respective to sender
       task4(NewMap, Max_Messages, Id, BEB, Sen);
     stop ->
       List = maps:to_list(Map),
@@ -37,4 +37,3 @@ task4(Map, Max_Messages, Id, BEB, Sen) ->
       task4(Map, Max_Messages, Id, BEB, Sen)
     end
   end.
-

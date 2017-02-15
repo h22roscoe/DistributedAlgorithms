@@ -15,8 +15,8 @@ next(App, PL) ->
 next(Processes, App, PL) ->
   receive
     {beb_broadcast, Msg} ->
-      [PL ! {pl_send, To, Msg} || To <- Processes];
+      [PL ! {pl_send, To, Msg} || To <- Processes]; % receive from BEB and send to PLs
     {pl_deliver, From, Msg} ->
-      App ! {beb_deliver, From, Msg}
+      App ! {beb_deliver, From, Msg} % receive from PL and send to App
   end,
   next(Processes, App, PL).
