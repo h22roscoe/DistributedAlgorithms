@@ -24,7 +24,7 @@ task6(Map, Max_Messages, Id, RB, Sen) ->
   receive
     {rb_deliver, Sender, {_, _, hello}} ->
       Recs = maps:get(Sender, Map),
-      NewMap = Map#{Sender := Recs + 1},
+      NewMap = Map#{Sender := Recs + 1},  % increment the received counter in the map respective to sender
       task6(NewMap, Max_Messages, Id, RB, Sen);
     stop ->
       List = maps:to_list(Map),
